@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>人員名冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1C2B4A;
+    --navy-deep:#121E36;
+    --paper:#FAF7F1;
+    --paper-deep:#F2EDE2;
+    --card:#FFFFFF;
+    --gold:#A87C3F;
+    --gold-soft:#E8DCC4;
+    --ink:#22262E;
+    --ink-secondary:#5C6478;
+    --ink-faint:#9098A8;
+    --line:#E4DFD3;
+    --line-strong:#D7CFBC;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .serif{font-family:'Noto Serif TC',serif;}
+
+  /* ===== App shell ===== */
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* ===== Header ===== */
+  .header{
+    background:var(--navy);
+    color:#fff;
+    padding:28px 20px 22px;
+    position:relative;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:4px;
+    background:linear-gradient(90deg, var(--gold) 0%, var(--gold) 40%, transparent 40%);
+    opacity:0.85;
+  }
+  .header-eyebrow{
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--gold-soft);
+    text-transform:uppercase;
+    margin:0 0 8px;
+    font-weight:500;
+  }
+  .header-title{
+    font-size:26px;
+    font-weight:700;
+    margin:0 0 4px;
+    letter-spacing:1px;
+  }
+  .header-sub{
+    font-size:13px;
+    color:rgba(255,255,255,0.62);
+    margin:0;
+  }
+  .header-stats{
+    display:flex;
+    gap:18px;
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid rgba(255,255,255,0.12);
+  }
+  .stat{flex:1;}
+  .stat-num{
+    font-size:20px;
+    font-weight:700;
+    font-family:'Noto Serif TC',serif;
+    color:#fff;
+    line-height:1.1;
+  }
+  .stat-label{
+    font-size:11px;
+    color:rgba(255,255,255,0.55);
+    margin-top:2px;
+  }
+
+  /* ===== Search ===== */
+  .search-wrap{
+    padding:14px 20px 6px;
+    background:var(--paper);
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  .search-box{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--card);
+    border:1px solid var(--line-strong);
+    border-radius:10px;
+    padding:10px 14px;
+  }
+  .search-box svg{flex-shrink:0; opacity:0.45;}
+  .search-box input{
+    border:none;
+    outline:none;
+    background:transparent;
+    font-size:14px;
+    width:100%;
+    font-family:inherit;
+    color:var(--ink);
+  }
+  .search-box input::placeholder{color:var(--ink-faint);}
+
+  /* ===== List ===== */
+  .list-wrap{padding:8px 20px 32px;}
+  .dept-group{margin-top:18px;}
+  .dept-label{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    font-size:12px;
+    font-weight:600;
+    color:var(--gold);
+    letter-spacing:0.5px;
+    margin:0 2px 8px;
+    text-transform:uppercase;
+  }
+  .dept-label .count{
+    color:var(--ink-faint);
+    font-weight:400;
+    text-transform:none;
+    letter-spacing:0;
+  }
+  .card-list{
+    background:var(--card);
+    border-radius:12px;
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .person-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:13px 14px;
+    cursor:pointer;
+    border-bottom:1px solid var(--line);
+    -webkit-tap-highlight-color:transparent;
+    transition:background 0.15s ease;
+  }
+  .person-row:last-child{border-bottom:none;}
+  .person-row:active{background:var(--paper-deep);}
+
+  .avatar{
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    background:var(--navy);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Noto Serif TC',serif;
+    font-weight:600;
+    font-size:15px;
+    flex-shrink:0;
+    position:relative;
+  }
+  .row-id{
+    font-size:10px;
+    color:var(--ink-faint);
+    font-family:'Noto Serif TC',serif;
+    letter-spacing:0.5px;
+    flex-shrink:0;
+    width:22px;
+    text-align:right;
+  }
+  .row-main{flex:1; min-width:0;}
+  .row-name{
+    font-size:15.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin:0 0 2px;
+  }
+  .row-meta{
+    font-size:12.5px;
+    color:var(--ink-secondary);
+    margin:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .row-meta .sep{color:var(--line-strong); margin:0 5px;}
+  .row-chevron{
+    flex-shrink:0;
+    opacity:0.35;
+  }
+
+  /* ===== Detail overlay ===== */
+  .detail{
+    position:fixed;
+    top:0; left:50%;
+    transform:translateX(calc(-50% + 100%));
+    width:100%;
+    max-width:480px;
+    height:100%;
+    background:var(--paper);
+    z-index:50;
+    overflow-y:auto;
+    transition:transform 0.32s cubic-bezier(.32,.72,0,1);
+    -webkit-overflow-scrolling:touch;
+  }
+  .detail.open{transform:translateX(-50%);}
+
+  .detail-header{
+    background:var(--navy);
+    color:#fff;
+    padding:16px 20px 26px;
+    position:relative;
+  }
+  .back-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(255,255,255,0.1);
+    border:none;
+    color:#fff;
+    font-size:13.5px;
+    font-family:inherit;
+    padding:8px 14px 8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-bottom:18px;
+  }
+  .detail-id{
+    font-size:11px;
+    color:var(--gold-soft);
+    letter-spacing:1.5px;
+    font-family:'Noto Serif TC',serif;
+    margin:0 0 8px;
+  }
+  .detail-name{
+    font-size:25px;
+    font-weight:700;
+    margin:0 0 8px;
+    letter-spacing:1px;
+  }
+  .detail-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .tag{
+    font-size:11.5px;
+    padding:4px 10px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.12);
+    color:rgba(255,255,255,0.85);
+  }
+  .tag.gold{
+    background:var(--gold);
+    color:#2A1E0E;
+    font-weight:500;
+  }
+
+  .detail-body{padding:22px 20px 40px;}
+  .section{margin-bottom:26px;}
+  .section-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--navy);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin:0 0 12px;
+  }
+  .section-title .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--gold);
+    flex-shrink:0;
+  }
+
+  .bio-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 16px 16px 18px;
+    border-left:3px solid var(--gold);
+  }
+  .bio-text{
+    font-size:14.5px;
+    line-height:1.85;
+    color:var(--ink);
+    margin:0;
+    white-space:pre-line;
+  }
+
+  .timeline{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:6px 16px;
+  }
+  .tl-item{
+    display:flex;
+    gap:12px;
+    padding:13px 0;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .tl-item:last-child{border-bottom:none;}
+  .tl-marker{
+    flex-shrink:0;
+    width:8px;
+    padding-top:5px;
+    display:flex;
+    justify-content:center;
+  }
+  .tl-marker .pip{
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--navy);
+    border:2px solid var(--gold-soft);
+  }
+  .tl-text{
+    font-size:14px;
+    color:var(--ink);
+    line-height:1.6;
+    flex:1;
+  }
+
+  .manager-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .manager-avatar{
+    width:46px;height:46px;
+    border-radius:50%;
+    background:var(--paper-deep);
+    border:1px solid var(--line-strong);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Noto Serif TC',serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--navy);
+    flex-shrink:0;
+  }
+  .manager-info .m-label{
+    font-size:11.5px;
+    color:var(--ink-faint);
+    margin:0 0 2px;
+  }
+  .manager-info .m-name{
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink);
+    margin:0;
+    font-family:'Noto Serif TC',serif;
+  }
+  .manager-note{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+    font-size:13.5px;
+    line-height:1.7;
+    color:var(--ink-secondary);
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--ink-faint);
+    font-size:14px;
+  }
+
+  @media (min-width: 481px){
+    .app{box-shadow:0 0 40px rgba(0,0,0,0.06);}
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <div class="header">
+    <p class="header-eyebrow">人員名冊 · personnel roster</p>
+    <h1 class="header-title serif">同仁名冊</h1>
+    <p class="header-sub">點選姓名查看完整個人簡歷</p>
+    <div class="header-stats" id="headerStats"></div>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="搜尋姓名、部門或職稱">
+    </div>
+  </div>
+
+  <div class="list-wrap" id="listWrap"></div>
+
+</div>
+
+<div class="detail" id="detailPanel"></div>
+
+<script>
+const PEOPLE = [{"company": "cs", "dept": "客服一部-一站式機場", "title": "客服副理", "name": "吳洆豪", "history": ["行銷企劃 5 年 8 個月", "副理 6 年 7 個月", "經理 1 年 5 個月", "處級主管 2 年 3 個月", "總經理／副總 3 年 7 個月", "總經理／副總 4 年", "客服主管與專案主管 1 年 5 個月"], "bio": "具備19至20年的豐富工作經驗，其中包含17年的團隊管理資歷，主管表示年初轉調一站式服務中心，隨即投入各項業務，協助中心由龍潭搬遷至蘆竹新址的建置作業。由於無論是房間設施配置，或整棟大樓各項設備的使用方式，都必須在極短時間內完成消化與熟悉，加上移工陸續入住，凡有設備損壞或異常情形，皆須第一時間掌握並進行修復，因此每日需頻繁往返十餘層樓處理各項事務。緊接著農曆年後，3月第一、二週更迎來移工大量入住的情況，需為每間房增設一個床位，並帶領同仁完成100間房間的床位增設作業，可說是全力以赴完成各項任務。", "manager": "陳冠享", "managerNote": ""}, {"company": "cs", "dept": "客服三課勞保局", "title": "客服督導", "name": "張珮珮", "history": ["證券金融系統客服 11 年 7 個月", "軟體測試主任工程師 2 年", "委外客服人員（主管職） 1 年 11 個月", "資訊客服經理 14 年 4 個月"], "bio": "具備25年以上的科技與金融產業實務經驗，其中包含16至17年的客服管理資歷。主管表示展現出超越新人階段的學習效率、職務投入度與管理潛力，為專案督導團隊中值得肯定與持續培育的新進管理人才。", "manager": "蔡孟岑", "managerNote": ""}, {"company": "cs", "dept": "業務部", "title": "助理", "name": "林欣怡", "history": ["飯店或餐廳主管 1~2 年", "櫃檯接待人員 2~3 年", "飯店工作人員 3~4 年", "門市／店員／專櫃人員 1~2 年", "行政助理 1 年（含）以下", "其他客服人員 1 年（含）以下", "調酒師／吧台人員 1~2 年"], "bio": "具備8至9年深厚的觀光旅館與服務業資歷，並並具備成熟的客訴案件處理、行政事務規劃與跨部門協調能力。主管表示\nheadcount在業務部，專案編制在手語案，屬學習曲線較長者", "manager": "曹偉玲", "managerNote": ""}, {"company": "cs", "dept": "資訊發展部(開發)", "title": "軟體設計工程師", "name": "郭奕均", "history": ["資訊管理系學生 4 年（2019～2023）", "軟體開發工程師培訓學員 1 年以下（畢業後）"], "bio": "專精於Java 與 Spring Boot 後端框架開發，熟悉 MySQL 資料庫操作具備前端技術基礎，曾主導開發「任務管理系統」專案，運用 MVC 架構進行邏輯分層設計。", "manager": "呂家華", "managerNote": ""}, {"company": "cs", "dept": "資訊發展部(開發)", "title": "高級軟體設計工程師", "name": "呂家丞", "history": ["基因體暨生物資訊研究所碩士 3 年（2019/09～2022/06）", "C# 工程師就業養成班培訓學員 1 年以下（2023～2024）", "全端開發工程師（專案實作） 2 年（2023/11）"], "bio": "具備跨領域背景，從生物資訊研究轉型為軟體開發工程師。碩士期間專注於基因體與生物資訊學，專長涵蓋ASP.NET Core MVC 全端開發以及 Python AI 應用，", "manager": "呂家華", "managerNote": ""}, {"company": "cs", "dept": "創新研發部", "title": "UIUX設計主任", "name": "洪宜筠", "history": ["UI/UX 設計師 3 年（2014/09～2017/08）", "SOHO 接案 UI/UX／視覺設計 5 年 5 個月（2019/03～2024/07）", "UI/UX 設計師 1 年（2024/07）"], "bio": "具備 9 至 10 年深厚的 UI/UX 與視覺設計實務經驗。專長涵蓋 App、Web 與複雜後台系統的介面規劃，精通 Wireframe、Prototype、Figma 等設計工具，並具備獨立建置 Design System 以提升開發效率的能力。曾主導多項專案（如 RunGood 形象網頁、Keeppurr App 及 AI SaaS 後台系統）從使用者需求拆解、資訊架構設計到最終介面落地的完整流程。具備將複雜邏輯轉化為直覺操作介面的核心能力，並擁有豐富的跨部門協作與 SOHO接案專案管理經驗。", "manager": "陳耿民", "managerNote": ""}, {"company": "cs", "dept": "總經理室", "title": "資深軟體設計工程師", "name": "張維哲", "history": ["1 對 1 英文家教老師 8 個月（2022/11～2023/06）", "自動化控制工程師 1 年 1 個月（2024/06～2025/06"], "bio": "具備紮實的資訊工程學術背景與軟硬體整合經驗，擁有國立臺灣科技大學資工碩士學位，研究重心為自然語言處理（NLP）與生成式AI在南亞科技擔任自動化控制工程師期間，負責系統維運、AI 應用研製及自動化流程改善，精通Python、C/C++、VB.NET、JavaScript 等多種語言，熟悉 PyTorch、HuggingFace 與 LangChain 等 AI 工具。主管表示 7/1預期轉換部門", "manager": "陳耿民", "managerNote": ""}, {"company": "cs", "dept": "總經理室", "title": "產品經理", "name": "陳韻如", "history": ["軟體工程師 1 年 1 個月（2019/07～2020/07）", "後端工程師 1 年 1 個月（2020/07～2021/07）", "軟體專案主管 1 年 10 個月（2021/09～2023/06）", "軟體專案主管 11 個月（2023/06～2024/04）", "專案經理 1 年 5 個月（2024/04)"], "bio": "具備9至10年豐富的軟體開發與技術管理經驗，擅長擔任技術研發與商業需求之間的橋樑。擁有深厚的全端開發資歷，精通 Python (Django/Flask)、JavaScript (Vue) 及 AWS/Azure雲端應用，職涯中多次主導從0到1的產品打造及跨國系統重構專案，擅長運用Scrum敏捷開發、CI/CD 自動化部署與OKR目標管理來提升團隊效率。具備卓越的團隊領導力與跨部門協商能力，能確保複雜專案在預算與時程內高品質交付", "manager": "陳耿民", "managerNote": ""}, {"company": "cs", "dept": "總經理室", "title": "UIUX設計師", "name": "歐子瑜", "history": ["UI 設計師 2 年 10 個月（2022/09～2025/06）"], "bio": "擁有約 2 至 3 年的平面與網頁設計實務經驗，專精於Figma、Wireframe 製作、使用者體驗設計以及網頁介面操作，能有效與開發團隊溝通。具備良好的團隊溝通力與高效率的專案執行力。主管表示對於UI設計表現不錯，期望再X應用能提供學習資源，能將UIUX有更成熟完整的展現。", "manager": "陳耿民", "managerNote": ""}, {"company": "cs", "dept": "總經理室", "title": "經理", "name": "陳耿民", "history": ["軟體工程師 10 個月（2000/12～2001/10）", "軟體研發工程師／測試組長 2 年 5 個月（2002/09～2005/02）", "軟體研發工程師 2 年（2005/03～2007/03）", "技術研發副理 11 年（2007/03～2018/03）", "資訊經理 2 年 4 個月（2018/03）"], "bio": "具備超過20年紮實的軟體研發、技術管理與專案領導資歷，專長橫跨大型軌道交通系統規劃（ERP/MIS/AFC）、數位法學資訊系統研發、分散式搜尋引擎及 AI 人工智慧應用（如 NLP 法律語意判斷、影像 OCR 辨識）。曾主導新北捷運自動收票與行動支付系統開發並取得專利，並於求學期間獲教育部 U-Star 創業競賽補助擔任研發執行長。持有 IPMA 國際專案管理師資格，擅長從無至有建置研發測試部門，精通多種程式語言與爬蟲技術，是一位兼具頂尖技術實力與卓越管理經驗的資深經理人", "manager": "老大", "managerNote": ""}, {"company": "cs", "dept": "總經理室", "title": "經理", "name": "呂孟彥", "history": ["Senior Site Reliability Engineer5年（2021/05～2025）", "Site Reliability Engineer2年（2019/06～2021/05）", "Site Reliability Engineer lead 7年7個月(2011/12~2019/06）", "UnixAdministrator5年3個月（2006/09～2011/11）"], "bio": "具備超過24年紮實的系統運維與DevOps/SRE專業資歷。專長橫跨大規模雲端架構遷移 (AWS)、基礎設施即程式碼 (Terraform) 及 GitOps 自動化部署 (ArgoCD/Kubernetes)\n。曾於 Shippo 主導可擴展性 IaC 倉庫重構，並在 Live Nation 擔任 SRE 團隊主管期間，成功引領團隊從傳統環境轉型至自動化雲端架構。具備管理超過千台伺服器規模之 24/7 資料中心實務經驗，擅長利用 Python 自動化解決複雜運維問題。", "manager": "老大", "managerNote": ""}];
+
+function escapeHTML(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function initials(name){
+  return name.slice(0,1);
+}
+
+function groupByDept(list){
+  const map = new Map();
+  list.forEach(p=>{
+    if(!map.has(p.dept)) map.set(p.dept, []);
+    map.get(p.dept).push(p);
+  });
+  return map;
+}
+
+function renderStats(){
+  const deptCount = new Set(PEOPLE.map(p=>p.dept)).size;
+  document.getElementById('headerStats').innerHTML = `
+    <div class="stat"><div class="stat-num serif">${PEOPLE.length}</div><div class="stat-label">位同仁</div></div>
+    <div class="stat"><div class="stat-num serif">${deptCount}</div><div class="stat-label">個部門</div></div>
+  `;
+}
+
+function renderList(filterText){
+  const wrap = document.getElementById('listWrap');
+  const q = (filterText||'').trim().toLowerCase();
+  const filtered = PEOPLE.filter(p=>{
+    if(!q) return true;
+    return p.name.toLowerCase().includes(q) || p.dept.toLowerCase().includes(q) || p.title.toLowerCase().includes(q);
+  });
+
+  if(filtered.length === 0){
+    wrap.innerHTML = `<div class="empty-state">找不到符合「${escapeHTML(filterText)}」的同仁</div>`;
+    return;
+  }
+
+  const grouped = groupByDept(filtered);
+  let html = '';
+  let counter = 0;
+  grouped.forEach((people, dept)=>{
+    html += `<div class="dept-group">
+      <p class="dept-label">${escapeHTML(dept)} <span class="count">· ${people.length} 人</span></p>
+      <div class="card-list">`;
+    people.forEach(p=>{
+      const idx = PEOPLE.indexOf(p);
+      counter++;
+      html += `
+        <div class="person-row" data-idx="${idx}">
+          <span class="row-id serif">${String(idx+1).padStart(3,'0')}</span>
+          <div class="avatar">${escapeHTML(initials(p.name))}</div>
+          <div class="row-main">
+            <p class="row-name serif">${escapeHTML(p.name)}</p>
+            <p class="row-meta">${escapeHTML(p.title)}<span class="sep">·</span>${escapeHTML(p.dept)}</p>
+          </div>
+          <svg class="row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C6478" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </div>`;
+    });
+    html += `</div></div>`;
+  });
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('.person-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      openDetail(parseInt(row.dataset.idx, 10));
+    });
+  });
+}
+
+function renderDetail(p, idx){
+  const timelineHTML = (p.history && p.history.length)
+    ? p.history.map(h => `
+        <div class="tl-item">
+          <div class="tl-marker"><span class="pip"></span></div>
+          <div class="tl-text">${escapeHTML(h)}</div>
+        </div>`).join('')
+    : `<div class="tl-item"><div class="tl-text" style="color:var(--ink-faint);">尚無經歷資料</div></div>`;
+
+  const managerNoteHTML = p.managerNote
+    ? `<div class="manager-note">${escapeHTML(p.managerNote)}</div>`
+    : '';
+
+  return `
+    <div class="detail-header">
+      <button class="back-btn" id="backBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        返回名冊
+      </button>
+      <p class="detail-id serif">人員編號 ${String(idx+1).padStart(3,'0')}</p>
+      <h2 class="detail-name serif">${escapeHTML(p.name)}</h2>
+      <div class="detail-tags">
+        <span class="tag gold">${escapeHTML(p.title)}</span>
+        <span class="tag">${escapeHTML(p.dept)}</span>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="section">
+        <p class="section-title"><span class="dot"></span>個人簡介</p>
+        <div class="bio-card">
+          <p class="bio-text">${escapeHTML(p.bio) || '尚無簡介資料'}</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <p class="section-title"><span class="dot"></span>經歷年資</p>
+        <div class="timeline">${timelineHTML}</div>
+      </div>
+
+      <div class="section">
+        <p class="section-title"><span class="dot"></span>直屬主管</p>
+        <div class="manager-card">
+          <div class="manager-avatar serif">${escapeHTML(initials(p.manager || '—'))}</div>
+          <div class="manager-info">
+            <p class="m-label">直屬主管</p>
+            <p class="m-name serif">${escapeHTML(p.manager) || '未提供'}</p>
+          </div>
+        </div>
+        ${managerNoteHTML}
+      </div>
+    </div>
+  `;
+}
+
+function openDetail(idx){
+  const p = PEOPLE[idx];
+  const panel = document.getElementById('detailPanel');
+  panel.innerHTML = renderDetail(p, idx);
+  panel.scrollTop = 0;
+  requestAnimationFrame(()=>{
+    panel.classList.add('open');
+  });
+  document.getElementById('backBtn').addEventListener('click', closeDetail);
+}
+
+function closeDetail(){
+  const panel = document.getElementById('detailPanel');
+  panel.classList.remove('open');
+}
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  renderList(e.target.value);
+});
+
+renderStats();
+renderList('');
+</script>
+
+</body>
+</html>
